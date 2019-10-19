@@ -1,0 +1,70 @@
+syntax = "proto2";
+
+package robosense.perception;
+
+//defined struct to contain the vector or point information
+message Point3 {
+  optional double x = 1;
+  optional double y = 2;
+  optional double z = 3;
+}
+
+message Perceptron {
+  optional double timestamp = 1;  // global timestamp in seconds.
+
+  //box info-------------------------------------------------------
+  optional Point3 location = 2;  // obstacle position in global coordinate in meters.
+  // Size of obstacle bounding box.
+  optional Point3 direction = 3; // obstacle normalized direction in global coordinate; when without tracking, it parallel to the length edge direction.
+
+  optional float yaw = 4;  // yaw angle in global coordinate with radian unit, another way to depict "direction" if only consider in x-y plane, in global coordinate.
+  optional float length = 5;  // obstacle length in meters, is always >= "width".
+  optional float width = 6;  // obstacle width in meters.
+  optional float height = 7;  // obstacle height in meters.
+  optional Point3 nearest_point = 8;  // nearest point of the bounding box corner of the obstacle to lidar self in global coordinate in meters.
+  repeated Point3 box_corners = 9;  // 8 corner points of the 3D bounding box of the obstacle in global coordinate in meters.
+
+
+//tracking info ----------------------------------------------------------------------
+  optional bool is_tracking_success = 10; // obstacle tracking state: tracked succeed or not, if not, the tracking information is not reliable.
+  optional int32 id = 11; // obstacle tracker ID.
+  optional float association_score = 12; // the confidence for the obstacle when associated to a tracker, 0~1, the greater, the better.
+  optional float tracker_robustness = 13; // the robustness for a tracker that the obstacle belong to, 0~1, the greater, the better.
+  optional Point3 velocity = 14; // obstacle velocity in global coordinate with unit m/s.
+  optional Point3 acceleration = 15; // obstacle acceleration in global coordinate with unit m/s^2.
+  optional float angular_velocity = 16; // angular velocity with radian in global coordinate with unit rad/s.
+  optional double tracking_time = 17; // the total time for the obstacle been tracked since been first detected, including visible or shadowed in seconds.
+  optional double visible_tracking_time = 18; // the time for the obstacle been tracked since been first detected, only for visible frames, in seconds.
+  repeated Point3 history_velocity = 19;  // historical velocity for the obstacle when tracked in global coordinate, default is 15 frames.
+  repeated Point3 trajectory = 20;  // historical trajectory for the obstacle when tracked in global coordinate in meters, default is 15 frames.
+
+//classification info------------------------------------------------------------------
+
+  //enum Type {
+      //UNKNOWN = 0; // unclassified or can not classified obstacles
+      //PEDESTRIAN = 1; // single separated pedestrian, unseparated group of persons are not included.
+      //BICYCLE = 2;  // people riding bike or motor bike
+      //CAR = 3; // small personal vehicle, like car, suv or small van
+      //TRUCK_BUS = 4;  // truck or bus or other cargo carrier.
+    //};
+
+  optional int32 type=21;// obstacle type, 0 mmeans unknown, 1 means pedestrain, 2 means bicycle, 3 means car, 4 means truck/bus.
+
+  optional float type_confidence = 22; // the confidence for the classification from classification module, 0~1, the greater, the better.
+  optional bool is_background = 23; // obstacle is background or not, the background is always means the big static objects such as buildings.
+
+  repeated Point3 polygon_point = 24;  // corner points of the convex hull of the obstacle in global coordinate in meters.
+  
+
+ // repeated Point3 cloud_point = 25; // original point-cloud of the obstacle in global coordinate in meters, in case if needed.
+}
+
+
+message PerceptronList{
+  optional int32 frmnumber =1; 
+  repeated Perceptron perceptron = 2;  // Array of percepted obstacles
+}
+
+
+
+
